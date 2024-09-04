@@ -27,7 +27,7 @@ load_dotenv(f"{home}/.config/nillion/nillion-devnet.env")
 
 
 # 1 Party running simple addition on 1 stored secret and 1 compute time secret
-async def main():
+async def main(max_range: int):
     cluster_id = os.getenv("NILLION_CLUSTER_ID")
     grpc_endpoint = os.getenv("NILLION_NILCHAIN_GRPC")
     chain_id = os.getenv("NILLION_NILCHAIN_CHAIN_ID")
@@ -115,7 +115,7 @@ async def main():
     # Create a computation time secret to use
     computation_time_secrets = nillion.NadaValues(
         {
-            "maxRange": nillion.SecretInteger(500),
+            "maxRange": nillion.SecretInteger(max_range),
         }
     )
 

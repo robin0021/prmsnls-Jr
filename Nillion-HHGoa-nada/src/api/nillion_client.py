@@ -22,8 +22,8 @@ async def get_random_number():
 
     seed = "my_seed"
 
-    userkey = UserKey.from_seed((seed))
-    nodekey = NodeKey.from_seed((seed))
+    userkey = UserKey.from_seed(seed)
+    nodekey = NodeKey.from_seed(seed)
 
     client = create_nillion_client(userkey, nodekey)
     party_id = client.party_id
@@ -52,6 +52,9 @@ async def get_random_number():
     action_id = await client.store_program(
         cluster_id, program_name, program_mir_path, receipt_store_program
     )
+
+    # Log the action_id for future reference
+    print(f"Program stored with action ID: {action_id}")
 
     program_id = f"{user_id}/{program_name}"
 
