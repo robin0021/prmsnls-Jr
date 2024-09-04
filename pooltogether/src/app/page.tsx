@@ -2,10 +2,11 @@
 
 import React from 'react';
 import ConnectWallet from '../components/ConnectWallet';
-import { Button } from '../components/ui/button';
+import { Button } from '@/components/ui/button';
 import { PoolTable } from '@/components/PoolTable';
 import { PoolPage } from '@/components/PoolPage';
 import Link from 'next/link';
+import { PoolProvider } from '@/context/PoolContext';
 
 const HomePage: React.FC = () => {
 
@@ -26,8 +27,10 @@ const HomePage: React.FC = () => {
       <main className="">
         <h2 className="text-3xl font-bold">Deposit to win up to $68,849</h2>
         <p>You can withdraw your full deposit at any time</p>
-        <PoolPage />
-        <PoolTable />
+        <PoolProvider>
+          <PoolPage />
+          <PoolTable />
+        </PoolProvider>
       </main>
     </div>
   );

@@ -2,10 +2,11 @@ import { ethers } from 'ethers';
 import abi from '../abi.json';
 
 // Connect to a Polygon node
-const provider = new ethers.JsonRpcProvider('https://polygon-mainnet.g.alchemy.com/v2/SyOFb3S3_TNhX25e1YzZklZPdVzQO-VO');
+// const provider = new ethers.JsonRpcProvider('https://polygon-mainnet.g.alchemy.com/v2/SyOFb3S3_TNhX25e1YzZklZPdVzQO-VO');
 
 // Your deployed contract address
-const contractAddress = '0x96A09A090a83198A6E08E2882DEce9C0057779F3';
+// const contractAddress = '0x96A09A090a83198A6E08E2882DEce9C0057779F3';
+const contractAddress = "0x0121Bc9b7E7a89197434f520Fa2df0501D1046Cd";
 
 // Function to connect to the contract and deposit funds
 async function depositFunds(amount: string): Promise<void> {
@@ -15,14 +16,15 @@ async function depositFunds(amount: string): Promise<void> {
         }
 
         // Connect to the user's wallet
-        const web3Provider = new ethers.BrowserProvider(window.ethereum);
+        // const web3Provider = new ethers.BrowserProvider(window.ethereum);
+        const web3Provider = new ethers.providers.JsonRpcProvider('https://polygon-mainnet.g.alchemy.com/v2/SyOFb3S3_TNhX25e1YzZklZPdVzQO-VO');
         const signer = await web3Provider.getSigner();
 
         // Create a contract instance with the signer
         const contract = new ethers.Contract(contractAddress, abi, signer);
 
         // Convert amount to Wei (1 Ether = 10^18 Wei)
-        const amountInWei = ethers.parseEther(amount);
+        const amountInWei = ethers.utils.parseEther(amount);
 
         // Call the deposit function on the contract
         const tx = await contract.deposit({ value: amountInWei });

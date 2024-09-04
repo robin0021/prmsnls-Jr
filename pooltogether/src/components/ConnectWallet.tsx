@@ -26,6 +26,7 @@ const ConnectWallet: React.FC = () => {
 
             window.ethereum.on('accountsChanged', handleAccountsChanged);
 
+            // Cleanup listener on component unmount
             return () => {
                 window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
             };
@@ -38,7 +39,7 @@ const ConnectWallet: React.FC = () => {
         if (window.ethereum && !isConnecting) {
             setIsConnecting(true);
             try {
-                const provider = new ethers.BrowserProvider(window.ethereum);
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const accounts = await provider.send("eth_requestAccounts", []);
                 if (accounts.length > 0) {
                     const signer = await provider.getSigner();
@@ -48,7 +49,7 @@ const ConnectWallet: React.FC = () => {
                 }
             } catch (error) {
                 if (error instanceof Error) {
-                    alert("Wallet connection request is already in process. Please check your wallet.");
+                    alert("Error connecting to wallet: " + error.message);
                 } else {
                     console.error("Error connecting to wallet:", error);
                 }
@@ -64,9 +65,6 @@ const ConnectWallet: React.FC = () => {
     const disconnectWallet = () => {
         setAccount(null);
         setSigner(null);
-        if (window.ethereum) {
-            window.ethereum.request({ method: 'eth_accounts' });
-        }
     };
 
     return (

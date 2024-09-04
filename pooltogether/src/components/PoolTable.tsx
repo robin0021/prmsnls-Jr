@@ -1,51 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { ethers } from "ethers";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ethers } from 'ethers';
-import abi from '../abi.json'; // Replace with your ABI
-
-const contractAddress = '0xYourContractAddress'; // Replace with your contract address
-
-interface Bid {
-    userAddress: string;
-    amount: string;
-    transactionId: string;
-    timestamp: string;
-}
+import { usePoolContext } from '@/context/PoolContext';
 
 export function PoolTable() {
-    const [bids, setBids] = useState<Bid[]>([]);
-    const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
+    const { bids, loading, loadBids } = usePoolContext();
+    const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null);
 
-    const fetchBids = async () => {
-        if (window.ethereum) {
-            try {
-                const provider = new ethers.BrowserProvider(window.ethereum);
-                setProvider(provider);
-                const contract = new ethers.Contract(contractAddress, abi, provider);
-
-                // Fetch active bids
-                const bidsData = await contract.getActiveBids(); // Ensure this method matches your smart contract
-
-                // Process bidsData to match your Bid interface
-                const formattedBids = bidsData.map((bid: any) => ({
-                    userAddress: bid.userAddress,
-                    amount: ethers.formatEther(bid.amount),
-                    transactionId: bid.transactionId,
-                    timestamp: new Date(bid.timestamp.toNumber() * 1000).toLocaleString() // Assuming timestamp is in seconds
-                }));
-
-                setBids(formattedBids);
-            } catch (error) {
-                console.error("Error fetching bids:", error);
-            }
-        } else {
-            console.error("No Ethereum provider found.");
-        }
-    };
     useEffect(() => {
-        fetchBids();
-    }, []);
+        const initEthers = async () => {
+            if (window.ethereum) {
+                const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+                setProvider(web3Provider);
+                await loadBids(web3Provider);
+            } else {
+                console.error('Please install MetaMask!');
+            }
+        };
+        initEthers();
+    }, [loadBids]);
 
     return (
         <div className="flex h-full w-full flex-col bg-muted/40 p-4">
@@ -56,26 +30,30 @@ export function PoolTable() {
                         <CardDescription>Total Bids active on Daily Basis</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>User Public Address</TableHead>
-                                    <TableHead className="hidden md:table-cell">Bid Amount</TableHead>
-                                    <TableHead className="hidden md:table-cell">Transactions</TableHead>
-                                    <TableHead className="hidden md:table-cell">Timestamps</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {bids.map((bid, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell className="font-medium">{bid.userAddress}</TableCell>
-                                        <TableCell className="hidden md:table-cell">${bid.amount}</TableCell>
-                                        <TableCell className="hidden md:table-cell">{bid.transactionId}</TableCell>
-                                        <TableCell className="hidden md:table-cell">{bid.timestamp}</TableCell>
+                        {loading ? (
+                            <p>Loading...</p>
+                        ) : (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>User Public Address</TableHead>
+                                        <TableHead>Amount (MATIC)</TableHead>
+                                        <TableHead>Transaction Hash</TableHead>
+                                        <TableHead>Timestamp</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {bids.map((bid, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell>{bid.user}</TableCell>
+                                            <TableCell className="hidden md:table-cell">{bid.amount} MATIC</TableCell>
+                                            <TableCell className="hidden md:table-cell">{bid.transactionHash}</TableCell>
+                                            <TableCell className="hidden md:table-cell">{bid.timestamp}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        )}
                     </CardContent>
                 </Card>
             </main>

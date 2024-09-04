@@ -31,6 +31,10 @@ contract pool is Ownable {
 
     constructor() Ownable(msg.sender) {}
 
+    function getActiveRound() public view returns (uint256) {
+        return ACTIVE_ROUND;
+    }
+
     function deposit() external payable {
         bytes32 _index = keccak256(abi.encodePacked(msg.sender, ACTIVE_ROUND));
         transaction storage txn = Transaction[_index];

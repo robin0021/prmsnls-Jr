@@ -10,6 +10,16 @@ import Link from 'next/link';
 interface Winner {
     walletAddress: string;
     amountWon: number;
+    roundId: number;
+    transactionHash: string;
+}
+
+interface LotteryResult {
+    success: boolean;
+    winner_address: string;
+    winning_number: number;
+    total_participants: number;
+    transaction_hash: string;
 }
 
 const WinnersPage: NextPage = () => {
@@ -58,7 +68,7 @@ const WinnersPage: NextPage = () => {
                 throw new Error('Failed to determine winner');
             }
 
-            const result = await response.json();
+            const result: LotteryResult = await response.json();
             console.log('Winner determined:', result);
 
             // Fetch updated winner data
@@ -77,7 +87,7 @@ const WinnersPage: NextPage = () => {
             if (!response.ok) {
                 throw new Error('Failed to fetch winners');
             }
-            const data = await response.json();
+            const data: Winner[] = await response.json();
             setWinners(data);
         } catch (error) {
             console.error('Error fetching winner data:', error);
@@ -100,14 +110,17 @@ const WinnersPage: NextPage = () => {
                         <TableHead>
                             <TableRow>
                                 <TableHeader>Rank</TableHeader>
+                                <TableHeader>Round ID</TableHeader>
                                 <TableHeader>Wallet Address</TableHeader>
                                 <TableHeader>Amount Won</TableHeader>
+                                <TableHeader>Transaction Hash</TableHeader>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {winners.map((winner, index) => (
                                 <TableRow key={index}>
                                     <TableCell>{index + 1}</TableCell>
+                                    <TableCell>{winner.roundId}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center space-x-2">
                                             <span className="text-sm text-muted-foreground truncate">{winner.walletAddress}</span>
@@ -121,6 +134,11 @@ const WinnersPage: NextPage = () => {
                                         </div>
                                     </TableCell>
                                     <TableCell>{winner.amountWon} ETH</TableCell>
+                                    <TableCell>
+                                        <a href={`https://etherscan.io/tx/${winner.transactionHash}`} target="_blank" rel="noopener noreferrer">
+                                            {winner.transactionHash.slice(0, 6)}...{winner.transactionHash.slice(-4)}
+                                        </a>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
